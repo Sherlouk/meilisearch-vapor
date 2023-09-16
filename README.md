@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sherlouk/meilisearch-vapor/main/.github/readme-logo.png" alt="meilisearch-vapor" width="543" height="200" />
+  <img src="https://raw.githubusercontent.com/Sherlouk/meilisearch-vapor/main/.github/readme-logo.png" alt="meilisearch-vapor" width="543" height="200" />
 </p>
 
 <h1 align="center">Meilisearch for Vapor</h1>

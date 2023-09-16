@@ -48,51 +48,51 @@ NB: you can also download Meilisearch from **Homebrew** or **APT** or even run i
 To do a simple insertion using the client, you can create a Swift script like this:
 
 ```swift
-    import MeiliSearchVapor
+import MeiliSearchVapor
 
-    // in your Vapor startup: 
-    func configure(app: Application) throws {
-        app.meilisearch.configure(host: "http://localhost:7700")
+// in your Vapor startup: 
+func configure(app: Application) throws {
+    app.meilisearch.configure(host: "http://localhost:7700")
+}
+
+// in your Vapor route:
+app.post("addDocuments") { req -> EventLoopFuture<String> in
+    let promise = req.eventLoop.makePromise(of: String.self)
+    
+    struct Movie: Codable, Equatable {
+        let id: Int
+        let title: String
+        let genres: [String]
     }
     
-    // in your Vapor route:
-    app.post("addDocuments") { req -> EventLoopFuture<String> in
-        let promise = req.eventLoop.makePromise(of: String.self)
-        
-        struct Movie: Codable, Equatable {
-            let id: Int
-            let title: String
-            let genres: [String]
+    let movies: [Movie] = [
+        Movie(id: 1, title: "Carol", genres: ["Romance", "Drama"]),
+        Movie(id: 2, title: "Wonder Woman", genres: ["Action", "Adventure"]),
+        Movie(id: 3, title: "Life of Pi", genres: ["Adventure", "Drama"]),
+        Movie(id: 4, title: "Mad Max: Fury Road", genres: ["Adventure", "Science Fiction"]),
+        Movie(id: 5, title: "Moana", genres: ["Fantasy", "Action"]),
+        Movie(id: 6, title: "Philadelphia", genres: ["Drama"])
+    ]
+    
+    // An index is where the documents are stored.
+    // The uid is the unique identifier to that index.
+    let index = req.meilisearch.index("movies")
+    
+    // If the index 'movies' does not exist, Meilisearch creates it when you first add the documents.
+    index.addDocuments(
+        documents: movies,
+        primaryKey: nil
+    ) { result in
+        switch result {
+        case .success(let task):
+            print(task) // => Task(uid: 0, status: "enqueued", ...)
+            promise.succeed(String(describing: task))
+        case .failure(let error):
+            promise.fail(error)
         }
-        
-        let movies: [Movie] = [
-            Movie(id: 1, title: "Carol", genres: ["Romance", "Drama"]),
-            Movie(id: 2, title: "Wonder Woman", genres: ["Action", "Adventure"]),
-            Movie(id: 3, title: "Life of Pi", genres: ["Adventure", "Drama"]),
-            Movie(id: 4, title: "Mad Max: Fury Road", genres: ["Adventure", "Science Fiction"]),
-            Movie(id: 5, title: "Moana", genres: ["Fantasy", "Action"]),
-            Movie(id: 6, title: "Philadelphia", genres: ["Drama"])
-        ]
-        
-        // An index is where the documents are stored.
-        // The uid is the unique identifier to that index.
-        let index = req.meilisearch.index("movies")
-        
-        // If the index 'movies' does not exist, Meilisearch creates it when you first add the documents.
-        index.addDocuments(
-            documents: movies,
-            primaryKey: nil
-        ) { result in
-            switch result {
-            case .success(let task):
-                print(task) // => Task(uid: 0, status: "enqueued", ...)
-                promise.succeed(String(describing: task))
-            case .failure(let error):
-                promise.fail(error)
-            }
-        }
-        
-        return promise.futureResult
     }
+    
+    return promise.futureResult
+}
 ```
 

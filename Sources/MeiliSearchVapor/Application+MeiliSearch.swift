@@ -1,5 +1,8 @@
 import Vapor
 import MeiliSearch
+#if canImport(FoundationNetworking)
+  import FoundationNetworking
+#endif
 
 extension Application {
     public var meilisearch: MeiliSearchService {
